@@ -31,4 +31,22 @@ public class ServicoDecoratorTest {
         assertEquals(new BigDecimal("75.00"), completo.preco());
         assertEquals("Banho + Hidratação + Perfume", completo.descricao());
     }
+
+    @Test
+    public void levaETrazSomaOPreco() {
+        ServicoPetshop tosa = new LevaETraz(new ServicoBase(Servico.TOSA));
+
+        assertEquals(new BigDecimal("80.00"), tosa.preco());
+        assertEquals("Tosa + Leva e traz", tosa.descricao());
+    }
+
+    @Test
+    public void listaDeAdicionaisAplicaOEscolhido() {
+        ServicoPetshop base = new ServicoBase(Servico.BANHO);
+
+        ServicoPetshop comPerfume = AdicionalDisponivel.PERFUME.aplicarEm(base);
+
+        assertEquals(new BigDecimal("50.00"), comPerfume.preco());
+        assertEquals("Banho + Perfume", comPerfume.descricao());
+    }
 }
