@@ -21,16 +21,19 @@ public class AgendamentoDAO implements AgendamentoRepository {
     // Devolve o agendamento já com o id gerado pelo banco
     @Override
     public Agendamento inserir(Agendamento a) {
-        String sql = "INSERT INTO agendamentos (pet_id, servico, data, hora, valor, status) "
-                + "VALUES (?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO agendamentos (pet_id, servico, descricao, data, hora, valor, "
+                + "status, observacoes, data_criacao) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
         try (Connection c = Conexao.getConexao();
              PreparedStatement ps = c.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             ps.setInt(1, a.getPetId());
             ps.setString(2, a.getServico().name());
-            ps.setString(3, a.getData().toString());
-            ps.setString(4, a.getHora().toString());
-            ps.setString(5, a.getValor().toPlainString());
-            ps.setString(6, a.getStatus().name());
+            ps.setString(3, a.getDescricao());
+            ps.setString(4, a.getData().toString());
+            ps.setString(5, a.getHora().toString());
+            ps.setString(6, a.getValor().toPlainString());
+            ps.setString(7, a.getStatus().name());
+            ps.setString(8, a.getObservacoes());
+            ps.setString(9, a.getDataCriacao().toString());
             ps.executeUpdate();
 
             int idGerado = 0;
@@ -39,8 +42,7 @@ public class AgendamentoDAO implements AgendamentoRepository {
                     idGerado = chaves.getInt(1);
                 }
             }
-            return new Agendamento(idGerado, a.getPetId(), a.getServico(), a.getData(),
-                    a.getHora(), a.getValor(), a.getStatus());
+            return a.comId(idGerado);
         } catch (SQLException e) {
             throw new RuntimeException("Erro ao inserir agendamento: " + e.getMessage(), e);
         }
@@ -116,9 +118,12 @@ public class AgendamentoDAO implements AgendamentoRepository {
                 rs.getInt("id"),
                 rs.getInt("pet_id"),
                 Servico.valueOf(rs.getString("servico")),
+                rs.getString("descricao"),
                 LocalDate.parse(rs.getString("data")),
                 LocalTime.parse(rs.getString("hora")),
                 new BigDecimal(rs.getString("valor")),
-                StatusAgendamento.valueOf(rs.getString("status")));
+                StatusAgendamento.valueOf(rs.getString("status")),
+                rs.getString("observacoes"),
+                LocalDate.parse(rs.getString("data_criacao")));
     }
 }

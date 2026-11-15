@@ -53,10 +53,13 @@ public class Conexao {
                     + "id INTEGER PRIMARY KEY AUTOINCREMENT, "
                     + "pet_id INTEGER NOT NULL, "
                     + "servico TEXT NOT NULL, "
+                    + "descricao TEXT NOT NULL, "
                     + "data TEXT NOT NULL, "
                     + "hora TEXT NOT NULL, "
                     + "valor TEXT NOT NULL, "
                     + "status TEXT NOT NULL, "
+                    + "observacoes TEXT, "
+                    + "data_criacao TEXT NOT NULL, "
                     + "FOREIGN KEY (pet_id) REFERENCES pets(id))");
             // Só um agendamento "AGENDADO" por data e hora
             s.execute("CREATE UNIQUE INDEX IF NOT EXISTS idx_horario_unico "
