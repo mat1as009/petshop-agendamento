@@ -1,5 +1,6 @@
 package com.petshop.command;
 
+import com.petshop.agenda.Agenda;
 import com.petshop.model.Agendamento;
 import com.petshop.model.Pet;
 import com.petshop.model.Servico;
@@ -9,11 +10,11 @@ import com.petshop.servico.AdicionalDisponivel;
 import com.petshop.servico.ServicoBase;
 import com.petshop.servico.ServicoPetshop;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.time.format.ResolverStyle;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Scanner;
@@ -22,18 +23,18 @@ import java.util.Set;
 public class AgendarServicoComando implements Comando {
     private static final DateTimeFormatter FORMATO =
             DateTimeFormatter.ofPattern("dd/MM/uuuu").withResolverStyle(ResolverStyle.STRICT);
-    private static final int PRIMEIRA_HORA = 8;
-    private static final int ULTIMA_HORA = 17;
 
     private final Scanner scanner;
     private final PetRepository petRepository;
     private final AgendamentoRepository agendamentoRepository;
+    private final Agenda agenda;
 
     public AgendarServicoComando(Scanner scanner, PetRepository petRepository,
                                  AgendamentoRepository agendamentoRepository) {
         this.scanner = scanner;
         this.petRepository = petRepository;
         this.agendamentoRepository = agendamentoRepository;
+        this.agenda = new Agenda(agendamentoRepository);
     }
 
     @Override
@@ -122,7 +123,7 @@ public class AgendarServicoComando implements Comando {
     }
 
     private LocalTime escolherHorario(LocalDate data) {
-        List<LocalTime> livres = horariosLivres(data);
+        List<LocalTime> livres = agenda.horariosLivres(data, LocalDateTime.now());
         if (livres.isEmpty()) {
             throw new IllegalArgumentException("Não há horários livres nesse dia.");
         }
@@ -136,23 +137,6 @@ public class AgendarServicoComando implements Comando {
             throw new IllegalArgumentException("Horário inválido.");
         }
         return livres.get(opcao - 1);
-    }
-
-    private List<LocalTime> horariosLivres(LocalDate data) {
-        List<LocalTime> ocupados = agendamentoRepository.horariosOcupados(data);
-        List<LocalTime> livres = new ArrayList<>();
-        for (int hora = PRIMEIRA_HORA; hora <= ULTIMA_HORA; hora++) {
-            LocalTime horario = LocalTime.of(hora, 0);
-            if (estaLivre(horario, data, ocupados)) {
-                livres.add(horario);
-            }
-        }
-        return livres;
-    }
-
-    private boolean estaLivre(LocalTime horario, LocalDate data, List<LocalTime> ocupados) {
-        boolean jaPassou = data.equals(LocalDate.now()) && !horario.isAfter(LocalTime.now());
-        return !ocupados.contains(horario) && !jaPassou;
     }
 
     private String perguntar(String pergunta) {
