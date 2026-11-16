@@ -1,0 +1,13 @@
+{
+  "nome": "Rex",
+  "especie": "Cachorro",
+  "raca": "Labrador",
+  "peso": 25.5,
+  "sexo": "MACHO",
+  "dataNascimento": "2020-03-10",
+  "cor": "Caramelo",
+  "castrado": true,
+  "observacoes": "",
+  "proximaVacina": "2026-12-01",
+  "clienteId": 1
+}
