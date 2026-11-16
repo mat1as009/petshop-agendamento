@@ -1,0 +1,8 @@
+{
+  "petId": 1,
+  "servico": "BANHO",
+  "adicionais": ["HIDRATACAO", "PERFUME"],
+  "data": "2030-01-15",
+  "hora": "09:00",
+  "observacoes": "Pet agitado"
+}
