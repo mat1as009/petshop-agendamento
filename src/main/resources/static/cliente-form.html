@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Cliente - Petshop</title>
+  <link rel="stylesheet" href="estilo.css">
+</head>
+<body>
+  <header>
+    <h1>Petshop</h1>
+    <nav>
+      <a href="index.html">Início</a>
+      <a href="clientes.html" class="ativo">Clientes</a>
+      <span class="desativado">Pets</span>
+      <span class="desativado">Agendamentos</span>
+    </nav>
+  </header>
+  <main>
+    <h2 id="titulo">Novo cliente</h2>
+    <p id="mensagem" role="alert"></p>
+
+    <form id="form">
+      <fieldset>
+        <legend>Dados do cliente</legend>
+        <label for="nome">Nome</label>
+        <input id="nome" required>
+
+        <div class="linha">
+          <div>
+            <label for="cpf">CPF</label>
+            <input id="cpf" placeholder="123.456.789-00" required>
+          </div>
+          <div>
+            <label for="dataNascimento">Data de nascimento</label>
+            <input id="dataNascimento" type="date">
+          </div>
+        </div>
+
+        <div class="linha">
+          <div>
+            <label for="telefone">Telefone</label>
+            <input id="telefone" placeholder="11999999999">
+          </div>
+          <div>
+            <label for="telefoneSecundario">Telefone secundário (opcional)</label>
+            <input id="telefoneSecundario">
+          </div>
+        </div>
+
+        <label for="email">Email (opcional)</label>
+        <input id="email" placeholder="nome@dominio.com">
+
+        <label for="observacoes">Observações (opcional)</label>
+        <textarea id="observacoes" rows="2"></textarea>
+      </fieldset>
+
+      <fieldset>
+        <legend>Endereço</legend>
+        <div class="linha">
+          <div>
+            <label for="cep">CEP</label>
+            <input id="cep" placeholder="01310-100" required>
+          </div>
+          <div>
+            <label for="estado">Estado (UF)</label>
+            <input id="estado" maxlength="2" placeholder="SP" required>
+          </div>
+        </div>
+
+        <label for="logradouro">Logradouro</label>
+        <input id="logradouro" required>
+
+        <div class="linha">
+          <div>
+            <label for="numero">Número</label>
+            <input id="numero" required>
+          </div>
+          <div>
+            <label for="complemento">Complemento (opcional)</label>
+            <input id="complemento">
+          </div>
+        </div>
+
+        <div class="linha">
+          <div>
+            <label for="bairro">Bairro</label>
+            <input id="bairro">
+          </div>
+          <div>
+            <label for="cidade">Cidade</label>
+            <input id="cidade" required>
+          </div>
+        </div>
+      </fieldset>
+
+      <p>
+        <button type="submit" id="salvar">Salvar</button>
+        <a class="botao" href="clientes.html">Cancelar</a>
+      </p>
+    </form>
+  </main>
+
+  <script>
+    const parametros = new URLSearchParams(location.search);
+    const id = parametros.get('id');
+    const form = document.getElementById('form');
+    const mensagem = document.getElementById('mensagem');
+    const botaoSalvar = document.getElementById('salvar');
+
+    const camposCliente = ['nome', 'cpf', 'telefone', 'telefoneSecundario', 'email', 'observacoes'];
+    const camposEndereco = ['cep', 'logradouro', 'numero', 'complemento', 'bairro', 'cidade', 'estado'];
+
+    function valor(campo) {
+      return document.getElementById(campo).value.trim();
+    }
+
+    function montarDados() {
+      const dados = {};
+      camposCliente.forEach(campo => { dados[campo] = valor(campo); });
+      dados.dataNascimento = valor('dataNascimento') || null;
+      dados.endereco = {};
+      camposEndereco.forEach(campo => { dados.endereco[campo] = valor(campo); });
+      return dados;
+    }
+
+    function preencher(cliente) {
+      camposCliente.forEach(campo => {
+        document.getElementById(campo).value = cliente[campo] ?? '';
+      });
+      document.getElementById('dataNascimento').value = cliente.dataNascimento ?? '';
+      camposEndereco.forEach(campo => {
+        document.getElementById(campo).value = cliente.endereco[campo] ?? '';
+      });
+    }
+
+    async function lerErro(resposta) {
+      try {
+        const corpo = await resposta.json();
+        return corpo.erro ?? 'Não foi possível salvar.';
+      } catch (e) {
+        return 'Não foi possível salvar.';
+      }
+    }
+
+    async function carregarCliente() {
+      document.getElementById('titulo').textContent = 'Editar cliente';
+      const resposta = await fetch('/api/clientes/' + id);
+      if (!resposta.ok) {
+        mensagem.textContent = 'Cliente não encontrado.';
+        form.hidden = true;
+        return;
+      }
+      preencher(await resposta.json());
+    }
+
+    form.addEventListener('submit', async (evento) => {
+      evento.preventDefault();
+      mensagem.textContent = '';
+      botaoSalvar.disabled = true;
+      try {
+        const resposta = await fetch(id ? '/api/clientes/' + id : '/api/clientes', {
+          method: id ? 'PUT' : 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(montarDados())
+        });
+        if (resposta.ok) {
+          location.href = 'clientes.html';
+          return;
+        }
+        mensagem.textContent = await lerErro(resposta);
+      } catch (e) {
+        mensagem.textContent = 'A API não respondeu. Ela está rodando?';
+      } finally {
+        botaoSalvar.disabled = false;
+      }
+    });
+
+    if (id) {
+      carregarCliente().catch(() => {
+        mensagem.textContent = 'A API não respondeu. Ela está rodando?';
+      });
+    }
+  </script>
+</body>
+</html>
