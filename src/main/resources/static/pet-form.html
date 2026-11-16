@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Pet - Petshop</title>
+  <link rel="stylesheet" href="estilo.css">
+</head>
+<body>
+  <header>
+    <h1>Petshop</h1>
+    <nav>
+      <a href="index.html">Início</a>
+      <a href="clientes.html">Clientes</a>
+      <a href="pets.html" class="ativo">Pets</a>
+      <span class="desativado">Agendamentos</span>
+    </nav>
+  </header>
+  <main>
+    <h2 id="titulo">Novo pet</h2>
+    <p id="mensagem" role="alert"></p>
+
+    <form id="form">
+      <fieldset>
+        <legend>Dados do pet</legend>
+
+        <label for="clienteId">Dono</label>
+        <select id="clienteId" required></select>
+
+        <label for="nome">Nome</label>
+        <input id="nome" required>
+
+        <div class="linha">
+          <div>
+            <label for="especie">Espécie</label>
+            <input id="especie" placeholder="Cachorro">
+          </div>
+          <div>
+            <label for="raca">Raça</label>
+            <input id="raca">
+          </div>
+        </div>
+
+        <div class="linha">
+          <div>
+            <label for="sexo">Sexo</label>
+            <select id="sexo" required>
+              <option value="">Selecione</option>
+              <option value="MACHO">Macho</option>
+              <option value="FEMEA">Fêmea</option>
+            </select>
+          </div>
+          <div>
+            <label for="peso">Peso em kg (opcional)</label>
+            <input id="peso" inputmode="decimal" placeholder="25,5">
+          </div>
+        </div>
+
+        <div class="linha">
+          <div>
+            <label for="dataNascimento">Data de nascimento</label>
+            <input id="dataNascimento" type="date">
+          </div>
+          <div>
+            <label for="proximaVacina">Próxima vacina</label>
+            <input id="proximaVacina" type="date">
+          </div>
+        </div>
+
+        <div class="linha">
+          <div>
+            <label for="cor">Cor</label>
+            <input id="cor">
+          </div>
+          <div>
+            <label for="castrado">Castrado</label>
+            <input id="castrado" type="checkbox" style="width:auto">
+          </div>
+        </div>
+
+        <label for="observacoes">Observações (opcional)</label>
+        <textarea id="observacoes" rows="2"></textarea>
+      </fieldset>
+
+      <p>
+        <button type="submit" id="salvar">Salvar</button>
+        <a class="botao" href="pets.html">Cancelar</a>
+      </p>
+    </form>
+  </main>
+
+  <script>
+    const id = new URLSearchParams(location.search).get('id');
+    const form = document.getElementById('form');
+    const mensagem = document.getElementById('mensagem');
+    const botaoSalvar = document.getElementById('salvar');
+    const donos = document.getElementById('clienteId');
+
+    const camposTexto = ['nome', 'especie', 'raca', 'cor', 'observacoes'];
+
+    function valor(campo) {
+      return document.getElementById(campo).value.trim();
+    }
+
+    function lerPeso() {
+      const texto = valor('peso');
+      if (texto === '') {
+        return null;
+      }
+      const numero = Number(texto.replace(',', '.'));
+      if (Number.isNaN(numero)) {
+        throw new Error('Peso inválido.');
+      }
+      return numero;
+    }
+
+    function montarDados() {
+      const dados = {};
+      camposTexto.forEach(campo => { dados[campo] = valor(campo); });
+      dados.peso = lerPeso();
+      dados.sexo = valor('sexo');
+      dados.dataNascimento = valor('dataNascimento') || null;
+      dados.proximaVacina = valor('proximaVacina') || null;
+      dados.castrado = document.getElementById('castrado').checked;
+      dados.clienteId = Number(donos.value);
+      return dados;
+    }
+
+    function preencher(pet) {
+      camposTexto.forEach(campo => {
+        document.getElementById(campo).value = pet[campo] ?? '';
+      });
+      document.getElementById('peso').value = pet.peso ?? '';
+      document.getElementById('sexo').value = pet.sexo;
+      document.getElementById('dataNascimento').value = pet.dataNascimento ?? '';
+      document.getElementById('proximaVacina').value = pet.proximaVacina ?? '';
+      document.getElementById('castrado').checked = pet.castrado;
+      donos.value = pet.clienteId;
+      donos.disabled = true;
+    }
+
+    async function lerErro(resposta) {
+      try {
+        const corpo = await resposta.json();
+        return corpo.erro ?? 'Não foi possível salvar.';
+      } catch (e) {
+        return 'Não foi possível salvar.';
+      }
+    }
+
+    async function carregarDonos() {
+      const resposta = await fetch('/api/clientes');
+      if (!resposta.ok) {
+        throw new Error('Falha ao carregar os clientes.');
+      }
+      const clientes = await resposta.json();
+      if (clientes.length === 0) {
+        mensagem.textContent = 'Cadastre um cliente primeiro.';
+        botaoSalvar.disabled = true;
+        return;
+      }
+      donos.replaceChildren(...clientes.map(c => {
+        const opcao = document.createElement('option');
+        opcao.value = c.id;
+        opcao.textContent = c.id + ' - ' + c.nome;
+        return opcao;
+      }));
+    }
+
+    async function carregarPet() {
+      document.getElementById('titulo').textContent = 'Editar pet (o dono não muda)';
+      const resposta = await fetch('/api/pets/' + id);
+      if (!resposta.ok) {
+        mensagem.textContent = 'Pet não encontrado.';
+        form.hidden = true;
+        return;
+      }
+      preencher(await resposta.json());
+    }
+
+    form.addEventListener('submit', async (evento) => {
+      evento.preventDefault();
+      mensagem.textContent = '';
+
+      let dados;
+      try {
+        dados = montarDados();
+      } catch (e) {
+        mensagem.textContent = e.message;
+        return;
+      }
+
+      botaoSalvar.disabled = true;
+      try {
+        const resposta = await fetch(id ? '/api/pets/' + id : '/api/pets', {
+          method: id ? 'PUT' : 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(dados)
+        });
+        if (resposta.ok) {
+          location.href = 'pets.html';
+          return;
+        }
+        mensagem.textContent = await lerErro(resposta);
+      } catch (e) {
+        mensagem.textContent = 'A API não respondeu. Ela está rodando?';
+      } finally {
+        botaoSalvar.disabled = false;
+      }
+    });
+
+    async function iniciar() {
+      await carregarDonos();
+      if (id) {
+        await carregarPet();
+      }
+    }
+
+    iniciar().catch(() => {
+      mensagem.textContent = 'A API não respondeu. Ela está rodando?';
+    });
+  </script>
+</body>
+</html>

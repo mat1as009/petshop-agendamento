@@ -22,12 +22,13 @@
       <p>
         <a class="botao" href="pets.html">Todos</a>
         <a class="botao" href="pets.html?filtro=vencidas">Vacina vencida</a>
+        <a class="botao" href="pet-form.html">Novo pet</a>
       </p>
     </div>
     <p id="mensagem" role="status"></p>
     <table>
       <thead>
-        <tr><th>ID</th><th>Nome</th><th>Espécie</th><th>Raça</th><th>Sexo</th><th>Dono</th><th>Próxima vacina</th></tr>
+        <tr><th>ID</th><th>Nome</th><th>Espécie</th><th>Raça</th><th>Sexo</th><th>Dono</th><th>Próxima vacina</th><th>Ações</th></tr>
       </thead>
       <tbody id="lista"></tbody>
     </table>
@@ -52,13 +53,28 @@
       return td;
     }
 
+    function acoes(pet) {
+      const editar = document.createElement('a');
+      editar.className = 'botao';
+      editar.textContent = 'Editar';
+      editar.href = 'pet-form.html?id=' + pet.id;
+
+      const excluirBotao = document.createElement('button');
+      excluirBotao.textContent = 'Excluir';
+      excluirBotao.addEventListener('click', () => excluir(pet));
+
+      const td = document.createElement('td');
+      td.append(editar, ' ', excluirBotao);
+      return td;
+    }
+
     function linha(pet, donos) {
       const tr = document.createElement('tr');
       const vacina = formatarData(pet.proximaVacina) + (pet.vacinaVencida ? ' (VENCIDA)' : '');
       tr.append(celula(pet.id), celula(pet.nome), celula(pet.especie), celula(pet.raca),
                 celula(sexos[pet.sexo] ?? pet.sexo),
                 celula(donos.get(pet.clienteId) ?? 'Cliente ' + pet.clienteId),
-                celula(vacina, pet.vacinaVencida));
+                celula(vacina, pet.vacinaVencida), acoes(pet));
       return tr;
     }
 
@@ -81,6 +97,19 @@
       const donos = new Map(clientes.map(c => [c.id, c.nome]));
       lista.replaceChildren(...pets.map(p => linha(p, donos)));
       mensagem.textContent = pets.length === 0 ? 'Nenhum pet encontrado.' : '';
+    }
+
+    async function excluir(pet) {
+      if (!confirm('Excluir ' + pet.nome + '?')) {
+        return;
+      }
+      const resposta = await fetch('/api/pets/' + pet.id, { method: 'DELETE' });
+      if (resposta.status === 204) {
+        await carregar();
+        return;
+      }
+      const corpo = await resposta.json();
+      mensagem.textContent = corpo.erro;
     }
 
     carregar().catch(() => {
