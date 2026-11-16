@@ -1,0 +1,18 @@
+{
+  "nome": "Maria Silva",
+  "cpf": "123.456.789-00",
+  "dataNascimento": "1990-05-20",
+  "telefone": "11999999999",
+  "telefoneSecundario": "",
+  "email": "maria@email.com",
+  "endereco": {
+    "cep": "01310-100",
+    "logradouro": "Avenida Paulista",
+    "numero": "1000",
+    "complemento": "",
+    "bairro": "Bela Vista",
+    "cidade": "São Paulo",
+    "estado": "SP"
+  },
+  "observacoes": ""
+}

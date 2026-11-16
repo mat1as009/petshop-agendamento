@@ -1,0 +1,12 @@
+{
+  "nome": "Teste",
+  "cpf": "123",
+  "telefone": "11999999999",
+  "endereco": {
+    "cep": "01310-100",
+    "logradouro": "Rua A",
+    "numero": "1",
+    "cidade": "São Paulo",
+    "estado": "SP"
+  }
+}
