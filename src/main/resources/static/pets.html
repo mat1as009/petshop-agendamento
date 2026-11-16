@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Pets - Petshop</title>
+  <link rel="stylesheet" href="estilo.css">
+</head>
+<body>
+  <header>
+    <h1>Petshop</h1>
+    <nav>
+      <a href="index.html">Início</a>
+      <a href="clientes.html">Clientes</a>
+      <a href="pets.html" class="ativo">Pets</a>
+      <span class="desativado">Agendamentos</span>
+    </nav>
+  </header>
+  <main>
+    <div class="topo">
+      <h2 id="titulo">Pets</h2>
+      <p>
+        <a class="botao" href="pets.html">Todos</a>
+        <a class="botao" href="pets.html?filtro=vencidas">Vacina vencida</a>
+      </p>
+    </div>
+    <p id="mensagem" role="status"></p>
+    <table>
+      <thead>
+        <tr><th>ID</th><th>Nome</th><th>Espécie</th><th>Raça</th><th>Sexo</th><th>Dono</th><th>Próxima vacina</th></tr>
+      </thead>
+      <tbody id="lista"></tbody>
+    </table>
+  </main>
+
+  <script>
+    const filtro = new URLSearchParams(location.search).get('filtro');
+    const lista = document.getElementById('lista');
+    const mensagem = document.getElementById('mensagem');
+    const sexos = { MACHO: 'Macho', FEMEA: 'Fêmea' };
+
+    function formatarData(data) {
+      return data ? data.split('-').reverse().join('/') : 'não informada';
+    }
+
+    function celula(texto, negrito) {
+      const td = document.createElement('td');
+      td.textContent = texto;
+      if (negrito) {
+        td.style.fontWeight = 'bold';
+      }
+      return td;
+    }
+
+    function linha(pet, donos) {
+      const tr = document.createElement('tr');
+      const vacina = formatarData(pet.proximaVacina) + (pet.vacinaVencida ? ' (VENCIDA)' : '');
+      tr.append(celula(pet.id), celula(pet.nome), celula(pet.especie), celula(pet.raca),
+                celula(sexos[pet.sexo] ?? pet.sexo),
+                celula(donos.get(pet.clienteId) ?? 'Cliente ' + pet.clienteId),
+                celula(vacina, pet.vacinaVencida));
+      return tr;
+    }
+
+    async function buscar(url) {
+      const resposta = await fetch(url);
+      if (!resposta.ok) {
+        throw new Error('Falha ao carregar.');
+      }
+      return resposta.json();
+    }
+
+    async function carregar() {
+      const vencidas = filtro === 'vencidas';
+      document.getElementById('titulo').textContent = vencidas ? 'Pets com vacina vencida' : 'Pets';
+
+      const [pets, clientes] = await Promise.all([
+        buscar(vencidas ? '/api/pets/vacina-vencida' : '/api/pets'),
+        buscar('/api/clientes')
+      ]);
+      const donos = new Map(clientes.map(c => [c.id, c.nome]));
+      lista.replaceChildren(...pets.map(p => linha(p, donos)));
+      mensagem.textContent = pets.length === 0 ? 'Nenhum pet encontrado.' : '';
+    }
+
+    carregar().catch(() => {
+      mensagem.textContent = 'Não foi possível carregar. A API está rodando?';
+    });
+  </script>
+</body>
+</html>
