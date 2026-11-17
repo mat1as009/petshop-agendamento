@@ -1,10 +1,13 @@
 package com.petshop.api;
 
 import com.petshop.agenda.Agenda;
+import com.petshop.agenda.Vacinacao;
 import com.petshop.model.Agendamento;
 import com.petshop.model.Servico;
+import com.petshop.model.StatusAgendamento;
 import com.petshop.repository.AgendamentoRepository;
 import com.petshop.repository.PetRepository;
+import com.petshop.repository.VacinaRepository;
 import com.petshop.servico.ServicoPetshop;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -16,15 +19,19 @@ import org.springframework.web.server.ResponseStatusException;
 
 @Service
 public class AgendamentoService {
+    private static final String STATUS_ACEITOS = "Status inválido. Use CANCELADO ou CONCLUIDO.";
+
     private final AgendamentoRepository agendamentoRepository;
     private final PetRepository petRepository;
     private final Agenda agenda;
+    private final Vacinacao vacinacao;
 
     public AgendamentoService(AgendamentoRepository agendamentoRepository,
-                              PetRepository petRepository) {
+                              PetRepository petRepository, VacinaRepository vacinaRepository) {
         this.agendamentoRepository = agendamentoRepository;
         this.petRepository = petRepository;
         this.agenda = new Agenda(agendamentoRepository);
+        this.vacinacao = new Vacinacao(vacinaRepository, petRepository);
     }
 
     public List<Agendamento> listar() {
@@ -53,6 +60,38 @@ public class AgendamentoService {
         Agendamento novo = new Agendamento(dados.petId(), servico, completo.descricao(),
                 completo.preco(), dados.data(), dados.hora(), dados.observacoes());
         return agendamentoRepository.inserir(novo);
+    }
+
+    // Cancela ou conclui. Concluir uma vacina registra no histórico e renova a data do pet.
+    public Agendamento alterarStatus(int id, String novoStatus) {
+        Agendamento atual = buscar(id);
+        StatusAgendamento status = converterStatus(novoStatus);
+        if (atual.getStatus() != StatusAgendamento.AGENDADO) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT,
+                    "Só agendamentos em aberto podem ser alterados.");
+        }
+
+        agendamentoRepository.atualizarStatus(id, status);
+        if (status == StatusAgendamento.CONCLUIDO && atual.getServico() == Servico.VACINA) {
+            vacinacao.registrar(atual.getPetId(), LocalDate.now());
+        }
+        return buscar(id);
+    }
+
+    private StatusAgendamento converterStatus(String texto) {
+        if (texto == null || texto.isBlank()) {
+            throw new IllegalArgumentException("O status é obrigatório.");
+        }
+        StatusAgendamento status;
+        try {
+            status = StatusAgendamento.valueOf(texto.trim().toUpperCase());
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException(STATUS_ACEITOS);
+        }
+        if (status == StatusAgendamento.AGENDADO) {
+            throw new IllegalArgumentException(STATUS_ACEITOS);
+        }
+        return status;
     }
 
     private void exigirPet(int petId) {

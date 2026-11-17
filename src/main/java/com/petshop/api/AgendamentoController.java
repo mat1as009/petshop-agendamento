@@ -5,6 +5,7 @@ import java.time.LocalDate;
 import java.util.List;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -40,5 +41,11 @@ public class AgendamentoController {
     public ResponseEntity<AgendamentoResponse> agendar(@RequestBody AgendamentoRequest dados) {
         AgendamentoResponse salvo = AgendamentoResponse.de(agendamentoService.agendar(dados));
         return ResponseEntity.created(URI.create("/api/agendamentos/" + salvo.id())).body(salvo);
+    }
+
+    @PatchMapping("/{id}")
+    public AgendamentoResponse alterarStatus(@PathVariable("id") int id,
+                                             @RequestBody AtualizarStatusRequest dados) {
+        return AgendamentoResponse.de(agendamentoService.alterarStatus(id, dados.status()));
     }
 }
