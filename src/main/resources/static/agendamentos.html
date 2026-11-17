@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Agendamentos - Petshop</title>
+  <link rel="stylesheet" href="estilo.css">
+</head>
+<body>
+  <header>
+    <h1>Petshop</h1>
+    <nav>
+      <a href="index.html">Início</a>
+      <a href="clientes.html">Clientes</a>
+      <a href="pets.html">Pets</a>
+      <a href="agendamentos.html" class="ativo">Agendamentos</a>
+    </nav>
+  </header>
+  <main>
+    <div class="topo">
+      <h2>Agendamentos</h2>
+      <a class="botao" href="agendar.html">Novo agendamento</a>
+    </div>
+    <p id="mensagem" role="status"></p>
+    <table>
+      <thead>
+        <tr><th>ID</th><th>Pet</th><th>Serviço</th><th>Data</th><th>Hora</th><th>Valor</th><th>Status</th><th>Ações</th></tr>
+      </thead>
+      <tbody id="lista"></tbody>
+    </table>
+  </main>
+
+  <script>
+    const lista = document.getElementById('lista');
+    const mensagem = document.getElementById('mensagem');
+    const rotulosStatus = { AGENDADO: 'Agendado', CONCLUIDO: 'Concluído', CANCELADO: 'Cancelado' };
+
+    function formatarData(data) {
+      return data.split('-').reverse().join('/');
+    }
+
+    function dinheiro(valor) {
+      return 'R$ ' + Number(valor).toFixed(2).replace('.', ',');
+    }
+
+    function celula(texto) {
+      const td = document.createElement('td');
+      td.textContent = texto;
+      return td;
+    }
+
+    function botao(texto, acao) {
+      const b = document.createElement('button');
+      b.textContent = texto;
+      b.addEventListener('click', acao);
+      return b;
+    }
+
+    function acoes(agendamento) {
+      const td = document.createElement('td');
+      if (agendamento.status !== 'AGENDADO') {
+        return td;
+      }
+      td.append(botao('Concluir', () => alterar(agendamento, 'CONCLUIDO')), ' ',
+                botao('Cancelar', () => alterar(agendamento, 'CANCELADO')));
+      return td;
+    }
+
+    function linha(agendamento, nomesDosPets) {
+      const tr = document.createElement('tr');
+      tr.append(celula(agendamento.id),
+                celula(nomesDosPets.get(agendamento.petId) ?? 'Pet ' + agendamento.petId),
+                celula(agendamento.descricao),
+                celula(formatarData(agendamento.data)),
+                celula(agendamento.hora),
+                celula(dinheiro(agendamento.valor)),
+                celula(rotulosStatus[agendamento.status] ?? agendamento.status),
+                acoes(agendamento));
+      return tr;
+    }
+
+    async function buscar(url) {
+      const resposta = await fetch(url);
+      if (!resposta.ok) {
+        throw new Error('Falha ao carregar.');
+      }
+      return resposta.json();
+    }
+
+    async function lerErro(resposta) {
+      try {
+        const corpo = await resposta.json();
+        return corpo.erro ?? 'Não foi possível concluir a ação.';
+      } catch (e) {
+        return 'Não foi possível concluir a ação.';
+      }
+    }
+
+    function mensagemFinal(agendamento, novoStatus) {
+      if (novoStatus === 'CANCELADO') {
+        return 'Agendamento cancelado. O horário voltou a ficar livre.';
+      }
+      if (agendamento.servico === 'VACINA') {
+        return 'Agendamento concluído. Vacina registrada e próxima vacina do pet renovada.';
+      }
+      return 'Agendamento concluído.';
+    }
+
+    async function carregar() {
+      const [agendamentos, pets] = await Promise.all([
+        buscar('/api/agendamentos'),
+        buscar('/api/pets')
+      ]);
+      const nomes = new Map(pets.map(p => [p.id, p.nome]));
+      lista.replaceChildren(...agendamentos.map(a => linha(a, nomes)));
+      mensagem.textContent = agendamentos.length === 0 ? 'Nenhum agendamento.' : '';
+    }
+
+    async function alterar(agendamento, novoStatus) {
+      const acao = novoStatus === 'CANCELADO' ? 'Cancelar' : 'Concluir';
+      if (!confirm(acao + ' o agendamento ' + agendamento.id + '?')) {
+        return;
+      }
+      const resposta = await fetch('/api/agendamentos/' + agendamento.id, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: novoStatus })
+      });
+      if (!resposta.ok) {
+        mensagem.textContent = await lerErro(resposta);
+        return;
+      }
+      await carregar();
+      mensagem.textContent = mensagemFinal(agendamento, novoStatus);
+    }
+
+    carregar().catch(() => {
+      mensagem.textContent = 'Não foi possível carregar. A API está rodando?';
+    });
+  </script>
+</body>
+</html>

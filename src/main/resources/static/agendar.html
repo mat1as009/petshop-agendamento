@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Agendar - Petshop</title>
+  <link rel="stylesheet" href="estilo.css">
+</head>
+<body>
+  <header>
+    <h1>Petshop</h1>
+    <nav>
+      <a href="index.html">Início</a>
+      <a href="clientes.html">Clientes</a>
+      <a href="pets.html">Pets</a>
+      <a href="agendamentos.html" class="ativo">Agendamentos</a>
+    </nav>
+  </header>
+  <main>
+    <h2>Novo agendamento</h2>
+    <p id="mensagem" role="alert"></p>
+
+    <form id="form">
+      <fieldset>
+        <legend>Serviço</legend>
+
+        <label for="petId">Pet</label>
+        <select id="petId" required></select>
+
+        <label for="servico">Serviço</label>
+        <select id="servico" required></select>
+
+        <label>Adicionais (opcional)</label>
+        <div id="adicionais"></div>
+
+        <p><strong>Orçamento:</strong> <span id="orcamento">-</span></p>
+      </fieldset>
+
+      <fieldset>
+        <legend>Data e horário</legend>
+        <div class="linha">
+          <div>
+            <label for="data">Data</label>
+            <input id="data" type="date" required>
+          </div>
+          <div>
+            <label for="hora">Horário livre</label>
+            <select id="hora" required></select>
+          </div>
+        </div>
+
+        <label for="observacoes">Observações (opcional)</label>
+        <textarea id="observacoes" rows="2"></textarea>
+      </fieldset>
+
+      <p>
+        <button type="submit" id="salvar">Agendar</button>
+        <a class="botao" href="agendamentos.html">Cancelar</a>
+      </p>
+    </form>
+  </main>
+
+  <script>
+    const form = document.getElementById('form');
+    const mensagem = document.getElementById('mensagem');
+    const botaoSalvar = document.getElementById('salvar');
+    const selecaoPet = document.getElementById('petId');
+    const selecaoServico = document.getElementById('servico');
+    const blocoAdicionais = document.getElementById('adicionais');
+    const orcamento = document.getElementById('orcamento');
+    const campoData = document.getElementById('data');
+    const selecaoHora = document.getElementById('hora');
+
+    function dinheiro(valor) {
+      return 'R$ ' + Number(valor).toFixed(2).replace('.', ',');
+    }
+
+    function opcao(valor, texto) {
+      const o = document.createElement('option');
+      o.value = valor;
+      o.textContent = texto;
+      return o;
+    }
+
+    function adicionaisMarcados() {
+      return [...blocoAdicionais.querySelectorAll('input:checked')].map(i => i.value);
+    }
+
+    async function buscar(url) {
+      const resposta = await fetch(url);
+      if (!resposta.ok) {
+        throw new Error('Falha ao carregar.');
+      }
+      return resposta.json();
+    }
+
+    async function lerErro(resposta) {
+      try {
+        const corpo = await resposta.json();
+        return corpo.erro ?? 'Não foi possível agendar.';
+      } catch (e) {
+        return 'Não foi possível agendar.';
+      }
+    }
+
+    function caixaDeAdicional(adicional) {
+      const caixa = document.createElement('input');
+      caixa.type = 'checkbox';
+      caixa.value = adicional.id;
+      caixa.style.width = 'auto';
+      caixa.addEventListener('change', atualizarOrcamento);
+
+      const rotulo = document.createElement('label');
+      rotulo.style.fontWeight = 'normal';
+      rotulo.append(caixa, ' ' + adicional.descricao);
+      return rotulo;
+    }
+
+    async function carregarBase() {
+      const [pets, clientes, catalogo] = await Promise.all([
+        buscar('/api/pets'), buscar('/api/clientes'), buscar('/api/servicos')
+      ]);
+      if (pets.length === 0) {
+        mensagem.textContent = 'Cadastre um pet primeiro.';
+        botaoSalvar.disabled = true;
+        return;
+      }
+      const donos = new Map(clientes.map(c => [c.id, c.nome]));
+      selecaoPet.replaceChildren(...pets.map(p =>
+        opcao(p.id, p.nome + ' (dono: ' + (donos.get(p.clienteId) ?? p.clienteId) + ')')));
+      selecaoServico.replaceChildren(...catalogo.servicos.map(s =>
+        opcao(s.id, s.descricao + ' - ' + dinheiro(s.preco))));
+      blocoAdicionais.replaceChildren(...catalogo.adicionais.map(caixaDeAdicional));
+      await atualizarOrcamento();
+    }
+
+    async function atualizarOrcamento() {
+      const resposta = await fetch('/api/servicos/orcamento', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ servico: selecaoServico.value, adicionais: adicionaisMarcados() })
+      });
+      if (!resposta.ok) {
+        orcamento.textContent = '-';
+        return;
+      }
+      const dados = await resposta.json();
+      orcamento.textContent = dados.descricao + ' = ' + dinheiro(dados.preco);
+    }
+
+    async function carregarHorarios() {
+      mensagem.textContent = '';
+      selecaoHora.replaceChildren();
+      if (!campoData.value) {
+        return;
+      }
+      const resposta = await fetch('/api/agendamentos/horarios-livres?data=' + campoData.value);
+      if (!resposta.ok) {
+        mensagem.textContent = await lerErro(resposta);
+        return;
+      }
+      const horarios = await resposta.json();
+      if (horarios.length === 0) {
+        mensagem.textContent = 'Não há horários livres nesse dia.';
+        return;
+      }
+      selecaoHora.replaceChildren(...horarios.map(h => opcao(h, h)));
+    }
+
+    function dataDeHoje() {
+      const hoje = new Date();
+      const mes = String(hoje.getMonth() + 1).padStart(2, '0');
+      const dia = String(hoje.getDate()).padStart(2, '0');
+      return hoje.getFullYear() + '-' + mes + '-' + dia;
+    }
+
+    selecaoServico.addEventListener('change', atualizarOrcamento);
+    campoData.addEventListener('change', carregarHorarios);
+    campoData.min = dataDeHoje();
+
+    form.addEventListener('submit', async (evento) => {
+      evento.preventDefault();
+      mensagem.textContent = '';
+      if (!selecaoHora.value) {
+        mensagem.textContent = 'Escolha uma data que tenha horário livre.';
+        return;
+      }
+
+      botaoSalvar.disabled = true;
+      try {
+        const resposta = await fetch('/api/agendamentos', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            petId: Number(selecaoPet.value),
+            servico: selecaoServico.value,
+            adicionais: adicionaisMarcados(),
+            data: campoData.value,
+            hora: selecaoHora.value,
+            observacoes: document.getElementById('observacoes').value.trim()
+          })
+        });
+        if (resposta.ok) {
+          location.href = 'agendamentos.html';
+          return;
+        }
+        mensagem.textContent = await lerErro(resposta);
+        await carregarHorarios();
+      } catch (e) {
+        mensagem.textContent = 'A API não respondeu. Ela está rodando?';
+      } finally {
+        botaoSalvar.disabled = false;
+      }
+    });
+
+    carregarBase().catch(() => {
+      mensagem.textContent = 'Não foi possível carregar. A API está rodando?';
+    });
+  </script>
+</body>
+</html>
