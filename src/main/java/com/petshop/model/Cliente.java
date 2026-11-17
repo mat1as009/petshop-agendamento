@@ -5,7 +5,7 @@ import java.time.LocalDate;
 public class Cliente {
     private final int id;
     private final String nome;
-    private final String cpf;          // guardado só com números
+    private final Cpf cpf;
     private final LocalDate dataNascimento;
     private final String telefone;
     private final String telefoneSecundario;
@@ -20,10 +20,6 @@ public class Cliente {
                    String observacoes, LocalDate dataCadastro) {
         if (nome == null || nome.isBlank()) {
             throw new IllegalArgumentException("O nome do cliente é obrigatório.");
-        }
-        String cpfNumeros = cpf == null ? "" : cpf.replaceAll("\\D", "");
-        if (cpfNumeros.length() != 11) {
-            throw new IllegalArgumentException("O CPF deve ter 11 números.");
         }
         if (email != null && !email.isBlank()
                 && !email.trim().matches("^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$")) {
@@ -41,7 +37,7 @@ public class Cliente {
         }
         this.id = id;
         this.nome = nome.trim();
-        this.cpf = cpfNumeros;
+        this.cpf = new Cpf(cpf);
         this.dataNascimento = dataNascimento;
         this.telefone = limpar(telefone);
         this.telefoneSecundario = limpar(telefoneSecundario);
@@ -57,18 +53,17 @@ public class Cliente {
 
     // Como os campos não mudam, "alterar" é criar uma cópia com o valor novo
     public Cliente comId(int novoId) {
-        return new Cliente(novoId, nome, cpf, dataNascimento, telefone, telefoneSecundario,
-                email, endereco, observacoes, dataCadastro);
+        return new Cliente(novoId, nome, cpf.numeros(), dataNascimento, telefone,
+                telefoneSecundario, email, endereco, observacoes, dataCadastro);
     }
 
     public String getCpfFormatado() {
-        return cpf.substring(0, 3) + "." + cpf.substring(3, 6) + "."
-                + cpf.substring(6, 9) + "-" + cpf.substring(9);
+        return cpf.formatado();
     }
 
     public int getId() { return id; }
     public String getNome() { return nome; }
-    public String getCpf() { return cpf; }
+    public String getCpf() { return cpf.numeros(); }
     public LocalDate getDataNascimento() { return dataNascimento; }
     public String getTelefone() { return telefone; }
     public String getTelefoneSecundario() { return telefoneSecundario; }
