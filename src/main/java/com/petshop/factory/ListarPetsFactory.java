@@ -2,12 +2,12 @@ package com.petshop.factory;
 
 import com.petshop.command.Comando;
 import com.petshop.command.ListarPetsComando;
-import com.petshop.dao.PetDAO;
+import com.petshop.dao.PetJdbcRepository;
 
 public class ListarPetsFactory implements ComandoFactory {
-    private final PetDAO petDAO;
+    private final PetJdbcRepository petDAO;
 
-    public ListarPetsFactory(PetDAO petDAO) {
+    public ListarPetsFactory(PetJdbcRepository petDAO) {
         this.petDAO = petDAO;
     }
 

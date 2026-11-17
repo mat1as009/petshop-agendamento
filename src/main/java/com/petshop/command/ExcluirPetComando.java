@@ -1,6 +1,6 @@
 package com.petshop.command;
 
-import com.petshop.dao.PetDAO;
+import com.petshop.dao.PetJdbcRepository;
 import com.petshop.model.Pet;
 import java.util.List;
 import java.util.Optional;
@@ -8,9 +8,9 @@ import java.util.Scanner;
 
 public class ExcluirPetComando implements Comando {
     private final Scanner scanner;
-    private final PetDAO petDAO;
+    private final PetJdbcRepository petDAO;
 
-    public ExcluirPetComando(Scanner scanner, PetDAO petDAO) {
+    public ExcluirPetComando(Scanner scanner, PetJdbcRepository petDAO) {
         this.scanner = scanner;
         this.petDAO = petDAO;
     }

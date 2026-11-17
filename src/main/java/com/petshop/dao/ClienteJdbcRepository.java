@@ -14,7 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-public class ClienteDAO implements ClienteRepository {
+public class ClienteJdbcRepository implements ClienteRepository {
     private static final String SELECT_COMPLETO =
             "SELECT * FROM clientes c JOIN enderecos e ON e.cliente_id = c.id";
 

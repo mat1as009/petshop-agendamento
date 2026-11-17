@@ -1,7 +1,7 @@
 package com.petshop.command;
 
 import com.petshop.builder.PetBuilder;
-import com.petshop.dao.PetDAO;
+import com.petshop.dao.PetJdbcRepository;
 import com.petshop.model.Pet;
 import com.petshop.model.Sexo;
 import java.math.BigDecimal;
@@ -18,9 +18,9 @@ public class EditarPetComando implements Comando {
             DateTimeFormatter.ofPattern("dd/MM/uuuu").withResolverStyle(ResolverStyle.STRICT);
 
     private final Scanner scanner;
-    private final PetDAO petDAO;
+    private final PetJdbcRepository petDAO;
 
-    public EditarPetComando(Scanner scanner, PetDAO petDAO) {
+    public EditarPetComando(Scanner scanner, PetJdbcRepository petDAO) {
         this.scanner = scanner;
         this.petDAO = petDAO;
     }

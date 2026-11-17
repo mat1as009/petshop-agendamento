@@ -1,6 +1,6 @@
 package com.petshop.command;
 
-import com.petshop.dao.AgendamentoDAO;
+import com.petshop.dao.AgendamentoJdbcRepository;
 import com.petshop.model.Agendamento;
 import com.petshop.model.StatusAgendamento;
 import java.util.List;
@@ -9,10 +9,10 @@ import java.util.Scanner;
 
 public class AlterarStatusAgendamentoComando implements Comando {
     private final Scanner scanner;
-    private final AgendamentoDAO agendamentoDAO;
+    private final AgendamentoJdbcRepository agendamentoDAO;
     private final StatusAgendamento novoStatus;
 
-    public AlterarStatusAgendamentoComando(Scanner scanner, AgendamentoDAO agendamentoDAO,
+    public AlterarStatusAgendamentoComando(Scanner scanner, AgendamentoJdbcRepository agendamentoDAO,
                                            StatusAgendamento novoStatus) {
         this.scanner = scanner;
         this.agendamentoDAO = agendamentoDAO;

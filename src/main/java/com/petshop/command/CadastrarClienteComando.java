@@ -1,7 +1,7 @@
 package com.petshop.command;
 
 import com.petshop.builder.ClienteBuilder;
-import com.petshop.dao.ClienteDAO;
+import com.petshop.dao.ClienteJdbcRepository;
 import com.petshop.model.Cliente;
 import com.petshop.model.Endereco;
 import java.time.LocalDate;
@@ -15,9 +15,9 @@ public class CadastrarClienteComando implements Comando {
             DateTimeFormatter.ofPattern("dd/MM/uuuu").withResolverStyle(ResolverStyle.STRICT);
 
     private final Scanner scanner;
-    private final ClienteDAO clienteDAO;
+    private final ClienteJdbcRepository clienteDAO;
 
-    public CadastrarClienteComando(Scanner scanner, ClienteDAO clienteDAO) {
+    public CadastrarClienteComando(Scanner scanner, ClienteJdbcRepository clienteDAO) {
         this.scanner = scanner;
         this.clienteDAO = clienteDAO;
     }

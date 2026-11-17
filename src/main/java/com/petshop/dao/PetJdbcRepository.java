@@ -15,7 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-public class PetDAO implements PetRepository {
+public class PetJdbcRepository implements PetRepository {
 
     // Devolve o pet já com o id gerado pelo banco
     @Override

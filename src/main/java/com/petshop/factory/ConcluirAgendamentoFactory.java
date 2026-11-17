@@ -2,19 +2,19 @@ package com.petshop.factory;
 
 import com.petshop.command.Comando;
 import com.petshop.command.ConcluirAgendamentoComando;
-import com.petshop.dao.AgendamentoDAO;
-import com.petshop.dao.PetDAO;
-import com.petshop.dao.VacinaDAO;
+import com.petshop.dao.AgendamentoJdbcRepository;
+import com.petshop.dao.PetJdbcRepository;
+import com.petshop.dao.VacinaJdbcRepository;
 import java.util.Scanner;
 
 public class ConcluirAgendamentoFactory implements ComandoFactory {
     private final Scanner scanner;
-    private final AgendamentoDAO agendamentoDAO;
-    private final PetDAO petDAO;
-    private final VacinaDAO vacinaDAO;
+    private final AgendamentoJdbcRepository agendamentoDAO;
+    private final PetJdbcRepository petDAO;
+    private final VacinaJdbcRepository vacinaDAO;
 
-    public ConcluirAgendamentoFactory(Scanner scanner, AgendamentoDAO agendamentoDAO,
-                                      PetDAO petDAO, VacinaDAO vacinaDAO) {
+    public ConcluirAgendamentoFactory(Scanner scanner, AgendamentoJdbcRepository agendamentoDAO,
+                                      PetJdbcRepository petDAO, VacinaJdbcRepository vacinaDAO) {
         this.scanner = scanner;
         this.agendamentoDAO = agendamentoDAO;
         this.petDAO = petDAO;

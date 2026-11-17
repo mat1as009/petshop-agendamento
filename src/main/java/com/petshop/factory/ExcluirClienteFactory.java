@@ -2,16 +2,16 @@ package com.petshop.factory;
 
 import com.petshop.command.Comando;
 import com.petshop.command.ExcluirClienteComando;
-import com.petshop.dao.ClienteDAO;
-import com.petshop.dao.PetDAO;
+import com.petshop.dao.ClienteJdbcRepository;
+import com.petshop.dao.PetJdbcRepository;
 import java.util.Scanner;
 
 public class ExcluirClienteFactory implements ComandoFactory {
     private final Scanner scanner;
-    private final ClienteDAO clienteDAO;
-    private final PetDAO petDAO;
+    private final ClienteJdbcRepository clienteDAO;
+    private final PetJdbcRepository petDAO;
 
-    public ExcluirClienteFactory(Scanner scanner, ClienteDAO clienteDAO, PetDAO petDAO) {
+    public ExcluirClienteFactory(Scanner scanner, ClienteJdbcRepository clienteDAO, PetJdbcRepository petDAO) {
         this.scanner = scanner;
         this.clienteDAO = clienteDAO;
         this.petDAO = petDAO;

@@ -1,8 +1,8 @@
 package com.petshop.command;
 
 import com.petshop.builder.PetBuilder;
-import com.petshop.dao.ClienteDAO;
-import com.petshop.dao.PetDAO;
+import com.petshop.dao.ClienteJdbcRepository;
+import com.petshop.dao.PetJdbcRepository;
 import com.petshop.model.Cliente;
 import com.petshop.model.Pet;
 import com.petshop.model.Sexo;
@@ -19,10 +19,10 @@ public class CadastrarPetComando implements Comando {
             DateTimeFormatter.ofPattern("dd/MM/uuuu").withResolverStyle(ResolverStyle.STRICT);
 
     private final Scanner scanner;
-    private final ClienteDAO clienteDAO;
-    private final PetDAO petDAO;
+    private final ClienteJdbcRepository clienteDAO;
+    private final PetJdbcRepository petDAO;
 
-    public CadastrarPetComando(Scanner scanner, ClienteDAO clienteDAO, PetDAO petDAO) {
+    public CadastrarPetComando(Scanner scanner, ClienteJdbcRepository clienteDAO, PetJdbcRepository petDAO) {
         this.scanner = scanner;
         this.clienteDAO = clienteDAO;
         this.petDAO = petDAO;

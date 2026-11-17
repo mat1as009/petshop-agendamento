@@ -2,12 +2,12 @@ package com.petshop.factory;
 
 import com.petshop.command.Comando;
 import com.petshop.command.ListarAgendamentosComando;
-import com.petshop.dao.AgendamentoDAO;
+import com.petshop.dao.AgendamentoJdbcRepository;
 
 public class ListarAgendamentosFactory implements ComandoFactory {
-    private final AgendamentoDAO agendamentoDAO;
+    private final AgendamentoJdbcRepository agendamentoDAO;
 
-    public ListarAgendamentosFactory(AgendamentoDAO agendamentoDAO) {
+    public ListarAgendamentosFactory(AgendamentoJdbcRepository agendamentoDAO) {
         this.agendamentoDAO = agendamentoDAO;
     }
 

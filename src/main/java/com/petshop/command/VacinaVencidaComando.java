@@ -1,13 +1,13 @@
 package com.petshop.command;
 
-import com.petshop.dao.PetDAO;
+import com.petshop.dao.PetJdbcRepository;
 import com.petshop.model.Pet;
 import java.util.List;
 
 public class VacinaVencidaComando implements Comando {
-    private final PetDAO petDAO;
+    private final PetJdbcRepository petDAO;
 
-    public VacinaVencidaComando(PetDAO petDAO) {
+    public VacinaVencidaComando(PetJdbcRepository petDAO) {
         this.petDAO = petDAO;
     }
 

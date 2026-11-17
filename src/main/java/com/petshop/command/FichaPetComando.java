@@ -1,8 +1,8 @@
 package com.petshop.command;
 
-import com.petshop.dao.ClienteDAO;
-import com.petshop.dao.PetDAO;
-import com.petshop.dao.VacinaDAO;
+import com.petshop.dao.ClienteJdbcRepository;
+import com.petshop.dao.PetJdbcRepository;
+import com.petshop.dao.VacinaJdbcRepository;
 import com.petshop.model.Cliente;
 import com.petshop.model.Pet;
 import com.petshop.model.Vacina;
@@ -17,11 +17,11 @@ public class FichaPetComando implements Comando {
     private static final int MAXIMO_VACINAS = 5;
 
     private final Scanner scanner;
-    private final PetDAO petDAO;
-    private final ClienteDAO clienteDAO;
-    private final VacinaDAO vacinaDAO;
+    private final PetJdbcRepository petDAO;
+    private final ClienteJdbcRepository clienteDAO;
+    private final VacinaJdbcRepository vacinaDAO;
 
-    public FichaPetComando(Scanner scanner, PetDAO petDAO, ClienteDAO clienteDAO, VacinaDAO vacinaDAO) {
+    public FichaPetComando(Scanner scanner, PetJdbcRepository petDAO, ClienteJdbcRepository clienteDAO, VacinaJdbcRepository vacinaDAO) {
         this.scanner = scanner;
         this.petDAO = petDAO;
         this.clienteDAO = clienteDAO;

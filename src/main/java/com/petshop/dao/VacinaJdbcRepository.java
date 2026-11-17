@@ -11,7 +11,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
-public class VacinaDAO implements VacinaRepository {
+public class VacinaJdbcRepository implements VacinaRepository {
 
     // Devolve a vacina já com o id gerado pelo banco
     @Override

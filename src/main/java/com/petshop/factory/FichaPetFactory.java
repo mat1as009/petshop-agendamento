@@ -2,18 +2,18 @@ package com.petshop.factory;
 
 import com.petshop.command.Comando;
 import com.petshop.command.FichaPetComando;
-import com.petshop.dao.ClienteDAO;
-import com.petshop.dao.PetDAO;
-import com.petshop.dao.VacinaDAO;
+import com.petshop.dao.ClienteJdbcRepository;
+import com.petshop.dao.PetJdbcRepository;
+import com.petshop.dao.VacinaJdbcRepository;
 import java.util.Scanner;
 
 public class FichaPetFactory implements ComandoFactory {
     private final Scanner scanner;
-    private final PetDAO petDAO;
-    private final ClienteDAO clienteDAO;
-    private final VacinaDAO vacinaDAO;
+    private final PetJdbcRepository petDAO;
+    private final ClienteJdbcRepository clienteDAO;
+    private final VacinaJdbcRepository vacinaDAO;
 
-    public FichaPetFactory(Scanner scanner, PetDAO petDAO, ClienteDAO clienteDAO, VacinaDAO vacinaDAO) {
+    public FichaPetFactory(Scanner scanner, PetJdbcRepository petDAO, ClienteJdbcRepository clienteDAO, VacinaJdbcRepository vacinaDAO) {
         this.scanner = scanner;
         this.petDAO = petDAO;
         this.clienteDAO = clienteDAO;

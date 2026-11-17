@@ -1,13 +1,13 @@
 package com.petshop.command;
 
-import com.petshop.dao.ClienteDAO;
+import com.petshop.dao.ClienteJdbcRepository;
 import com.petshop.model.Cliente;
 import java.util.List;
 
 public class ListarClientesComando implements Comando {
-    private final ClienteDAO clienteDAO;
+    private final ClienteJdbcRepository clienteDAO;
 
-    public ListarClientesComando(ClienteDAO clienteDAO) {
+    public ListarClientesComando(ClienteJdbcRepository clienteDAO) {
         this.clienteDAO = clienteDAO;
     }
 

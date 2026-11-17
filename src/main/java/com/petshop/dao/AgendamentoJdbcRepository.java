@@ -16,7 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-public class AgendamentoDAO implements AgendamentoRepository {
+public class AgendamentoJdbcRepository implements AgendamentoRepository {
 
     // Devolve o agendamento já com o id gerado pelo banco
     @Override

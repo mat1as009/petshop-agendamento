@@ -1,11 +1,11 @@
 package com.petshop;
 
 import com.petshop.controller.MenuController;
-import com.petshop.dao.AgendamentoDAO;
-import com.petshop.dao.ClienteDAO;
+import com.petshop.dao.AgendamentoJdbcRepository;
+import com.petshop.dao.ClienteJdbcRepository;
 import com.petshop.dao.Conexao;
-import com.petshop.dao.PetDAO;
-import com.petshop.dao.VacinaDAO;
+import com.petshop.dao.PetJdbcRepository;
+import com.petshop.dao.VacinaJdbcRepository;
 import com.petshop.factory.AgendarServicoFactory;
 import com.petshop.factory.CadastrarClienteFactory;
 import com.petshop.factory.CadastrarPetFactory;
@@ -31,10 +31,10 @@ public class App {
         Conexao.criarTabelas();
 
         Scanner scanner = new Scanner(System.in);
-        ClienteDAO clienteDAO = new ClienteDAO();
-        PetDAO petDAO = new PetDAO();
-        AgendamentoDAO agendamentoDAO = new AgendamentoDAO();
-        VacinaDAO vacinaDAO = new VacinaDAO();
+        ClienteJdbcRepository clienteDAO = new ClienteJdbcRepository();
+        PetJdbcRepository petDAO = new PetJdbcRepository();
+        AgendamentoJdbcRepository agendamentoDAO = new AgendamentoJdbcRepository();
+        VacinaJdbcRepository vacinaDAO = new VacinaJdbcRepository();
 
         Map<String, ComandoFactory> fabricas = new HashMap<>();
         fabricas.put("1", new CadastrarClienteFactory(scanner, clienteDAO));
