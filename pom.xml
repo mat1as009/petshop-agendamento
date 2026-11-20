@@ -29,6 +29,12 @@
       <artifactId>spring-boot-starter-webmvc</artifactId>
     </dependency>
 
+    <!-- Autenticação e proteção da API -->
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-security</artifactId>
+    </dependency>
+
     <!-- Ponte entre o Java e o banco SQLite -->
     <dependency>
       <groupId>org.xerial</groupId>
