@@ -18,6 +18,7 @@ Requisitos: JDK 21 ou superior e o VS Code com a extensão "Extension Pack for J
 
 - **Terminal:** execute a classe `App` (`src/main/java/com/petshop/App.java`).
 - **API e páginas web:** execute a classe `PetshopApiApplication` (`src/main/java/com/petshop/api/PetshopApiApplication.java`) e abra `http://localhost:8080/`.
+- **Login:** a API e as páginas pedem usuário e senha. O padrão de demonstração fica em `SegurancaConfig.java`; para trocar, defina as variáveis de ambiente. 
 - **Testes:** pelo painel de testes do VS Code (ícone do frasco), ou `mvn test` se o Maven estiver instalado.
 
 O banco SQLite (`petshop.db`) é criado automaticamente na primeira execução.
@@ -81,13 +82,16 @@ Testes unitários com JUnit, sem banco e sem servidor: os repositórios de verda
 
 ## Segurança
 
-Mitigações atuais:
+- **Autenticação:** Spring Security com HTTP Basic. Todas as rotas exigem login.
+ **Senha com hash:** a senha é guardada com BCrypt.
+- **Sem sessão no servidor:** a API não guarda estado, e cada pedido leva a credencial.
+- **Cabeçalhos de segurança:** acrescentados pelo Spring Security nas respostas (por exemplo, `X-Content-Type-Options` e `X-Frame-Options`).
+- **Injeção de SQL:** `PreparedStatement` nas consultas com dados informados pelo usuário.
+- **XSS:** as páginas inserem os dados com `textContent`, e não com `innerHTML`.
+- **Validação de entrada:** CPF, CEP, email, datas e peso são validados na criação dos objetos, e dados inválidos devolvem 400.
+- **Arquivos sensíveis fora do repositório:** o banco de dados e os arquivos gerados estão no `.gitignore`.
 
-- `PreparedStatement` nas consultas com dados informados pelo usuário (contra injeção de SQL)
-- Validação dos dados na criação dos objetos (CPF, CEP, email, datas, peso)
-- As páginas inserem os dados com `textContent`, e não com `innerHTML` (contra XSS)
-- O banco de dados e os arquivos gerados ficam fora do repositório (`.gitignore`)
-Ainda não há autenticação.
+Limitações conhecidas: o CSRF está desativado de propósito, porque a API é usada por clientes HTTP que enviam a credencial em cada pedido; em produção o ideal seria usar token (JWT) e HTTPS. A senha padrão existe só para demonstração.
 
 ## Estrutura
 
